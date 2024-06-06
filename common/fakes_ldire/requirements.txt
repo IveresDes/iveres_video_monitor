@@ -1,0 +1,7 @@
+torch==2.2.0
+transformers==4.37.2
+diffusers==0.25.1
+accelerate==0.26.1
+pillow==10.2.0
+seaborn==0.13.2
+# scikit-image==0.21.0

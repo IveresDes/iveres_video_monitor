@@ -1,0 +1,7 @@
+common/
+data/
+envs/
+scripts/
+service_keys/
+services/
+web_app/

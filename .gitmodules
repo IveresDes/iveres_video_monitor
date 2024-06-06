@@ -1,0 +1,6 @@
+[submodule "common/fakes_deepware/deepfake_scanner"]
+	path = common/fakes_deepware/deepfake_scanner
+	url = https://github.com/Hook35/deepfake-scanner.git
+[submodule "common/fakes_polimi/icpr2020dfdc"]
+	path = common/fakes_polimi/icpr2020dfdc
+	url = https://github.com/polimi-ispl/icpr2020dfdc.git

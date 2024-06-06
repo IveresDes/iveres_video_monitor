@@ -1,0 +1,4 @@
+tiktokapipy==0.2.3
+pymongo==4.3.3
+playwright==1.40.0
+playwright-stealth==1.0.6

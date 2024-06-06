@@ -1,0 +1,5 @@
+--constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.6.2/constraints-3.7.txt"
+apache-airflow==2.6.2
+python-dotenv==0.21.1
+mysqlclient==2.1.1
+pymongo==4.3.3

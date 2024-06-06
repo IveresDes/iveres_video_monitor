@@ -1,0 +1,2 @@
+yt-dlp @ git+https://github.com/yt-dlp/yt-dlp.git@876b70c8edf4c0147f180bd981fbc4d625cbfb9c
+pymongo==4.3.3
