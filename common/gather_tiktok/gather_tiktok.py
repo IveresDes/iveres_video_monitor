@@ -28,7 +28,7 @@ def tiktokmonitor(channel_url: str):
         # ESTE ES EL PUNTO DE PARTIDA: CAPTURAR TODAS LAS LLAMADAS DE RED QUE SE HACEN POR DETRÁS Y GUARDARLAS EN UN ARCHIVO.
         browser_context = browser.new_context(record_har_path=temp_file.name)
         page = browser_context.new_page()
-        stealth_sync(page)  # aplicar ofuscación para evitar ser detectado como bot
+        # stealth_sync(page)  # aplicar ofuscación para evitar ser detectado como bot
         page.goto(channel_url)
         # Esperar a recibir todas las llamadas de red
         try:
@@ -70,7 +70,8 @@ def tiktokmonitor(channel_url: str):
         items = [
             x
             for x in items
-            if channel_id in {x["author"]["uniqueId"], x["author"]["id"]}
+            if x.get("author")
+            and channel_id in {x["author"]["uniqueId"], x["author"]["id"]}
         ]
 
         # EXTRAIGO EL LISTADO DE VÍDEOS

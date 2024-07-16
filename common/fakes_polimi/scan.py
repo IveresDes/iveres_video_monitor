@@ -105,8 +105,8 @@ def process(face_extractor, transformer, net, file, graph_file=None, device="cpu
             expit(faces_real_pred),
             use_line_collection=True,
         )
-        ax.set_xlabel("Frame")
-        ax.set_ylabel("Score")
+        ax.set_xlabel("Fotograma")
+        ax.set_ylabel("Probabilidad de fake")
         ax.set_ylim([0, 1])
         ax.grid(True)
         fig.savefig(graph_file)
