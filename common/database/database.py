@@ -171,7 +171,7 @@ def store_video_fakes(video_id: str, deepware_res, polimi_res):
     )
 
 
-def store_image_fakes(media_id: str, organika_res):
+def store_image_fakes(media_id: str, results: dict):
     logger.debug(f"Updating fakes for media: {media_id}")
     return client[db]["videos"].update_one(
         {"_id": ObjectId(media_id)},
@@ -179,7 +179,10 @@ def store_image_fakes(media_id: str, organika_res):
             "$set": {
                 "status": "analyzed",
                 "analysisStatus.fake": "done",
-                "extractedMetadata.fakes.organika": organika_res,
+                **{
+                    f"extractedMetadata.fakes.{key}": res
+                    for key, res in results.items()
+                },
             }
         },
     )

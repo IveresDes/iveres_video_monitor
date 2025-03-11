@@ -11,14 +11,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def create_scanner(device="cpu"):
-    pipe = pipeline(
-        "image-classification", model="Organika/sdxl-detector", device=device
-    )
+def create_scanner(
+    device="cpu", model_id="Organika/sdxl-detector", fake_label="artificial"
+):
+    pipe = pipeline("image-classification", model=model_id, device=device)
 
     def scan(img_path):
         res = pipe(img_path)
-        score = next(x["score"] for x in res if x["label"] == "artificial")
+        score = next(x["score"] for x in res if x["label"] == fake_label)
         return score
 
     return scan

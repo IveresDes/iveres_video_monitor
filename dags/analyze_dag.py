@@ -28,7 +28,7 @@ def analyze_dag():
 
     @task
     def get_videos(videos_dir):
-        videos = get_videos_to_analyze(max_num=3)
+        videos = get_videos_to_analyze(max_num=1)
         videos_out = [
             {
                 "id": str(video["_id"]),
@@ -138,10 +138,10 @@ def analyze_dag():
         for dw_res, pl_res in zip(deepware_results, polimi_results):
             store_video_fakes(dw_res["video"]["id"], dw_res["result"], pl_res["result"])
 
-    @task.external_python(python=config["PYTHON_LDIRE"])
-    def detect_image_fakes_ldire(videos_dir, media_list: list):
+    @task.external_python(python=config["PYTHON_IMG_FAKES"])
+    def detect_image_fakes_segment(videos_dir, media_list: list):
         from pathlib import Path
-        from common.fakes_ldire.scan import create_scanner
+        from common.fakes_segment.scan import create_scanner
 
         filtered_media = [
             media
@@ -152,26 +152,28 @@ def analyze_dag():
         if not filtered_media:
             return []
 
-        scan_file = create_scanner(device="cuda:0")
+        scan_file = create_scanner(device="cpu")
         results = []
         for media in filtered_media:
-            result = {"score": -1, "figure": ""}
+            result = {"media": media, "result": {}}
             try:
-                error, score, error_map_fig = scan_file(
-                    media["file"], reconstruct_num=50
-                )
                 file_path = Path(media["file"])
-                figure_path = file_path.with_name(f"{file_path.stem}_ldire.jpg")
-                error_map_fig.savefig(str(figure_path))
-                figure_path_rel = figure_path.relative_to(videos_dir)
-                result = {"score": score, "figure": str(figure_path_rel)}
+                score_image_path = file_path.with_name(f"{file_path.stem}_score.jpg")
+                score, score_image = scan_file(file_path)
+                score_image.save(str(score_image_path))
+                score_image_path_rel = score_image_path.relative_to(videos_dir)
+                result["result"]["segment"] = {
+                    "name": "Segment",
+                    "score": score,
+                    "score_image": str(score_image_path_rel),
+                }
             except Exception as e:
-                print(f"Problem analyzing media {media['id']} with ldire", e)
-            results.append({"media": media, "result": result})
+                print(f"Problem analyzing media {media['id']} with segment", e)
+            results.append(result)
 
         return results
 
-    @task.external_python(python=config["PYTHON_LDIRE"])
+    @task.external_python(python=config["PYTHON_IMG_FAKES"])
     def detect_image_fakes_hf(media_list: list):
         from common.fakes_hf.scan import create_scanner
 
@@ -184,23 +186,52 @@ def analyze_dag():
         if not filtered_media:
             return []
 
-        scan_file = create_scanner(device="cuda:0")
+        methods = [
+            dict(
+                key="organika",
+                model_id="Organika/sdxl-detector",
+                fake_label="artificial",
+            ),
+            dict(
+                key="aiornot",
+                model_id="Nahrawy/AIorNot",
+                fake_label="ai",
+            ),
+        ]
+        scanners = [
+            dict(
+                method=method,
+                scan_file=create_scanner(
+                    "cpu", method["model_id"], method["fake_label"]
+                ),
+            )
+            for method in methods
+        ]
         results = []
         for media in filtered_media:
-            result = {"score": -1}
-            try:
-                score = scan_file(media["file"])
-                result = {"score": score}
-            except Exception as e:
-                print(f"Problem analyzing media {media['id']} with hf", e)
-            results.append({"media": media, "result": result})
+            result = {"media": media, "result": {}}
+            for scanner in scanners:
+                key = scanner["method"]["key"]
+                score = -1
+                try:
+                    score = scanner["scan_file"](media["file"])
+                except Exception as e:
+                    print(
+                        f"Problem analyzing media {media['id']} with scanner {key}", e
+                    )
+                result["result"][key] = {
+                    "score": score,
+                    "name": scanner["method"]["model_id"],
+                }
+            results.append(result)
 
         return results
 
     @task
-    def save_image_fakes(hf_results: list):
-        for hf_res in hf_results:
-            store_image_fakes(hf_res["media"]["id"], hf_res["result"])
+    def save_image_fakes(hf_results: list, segment_results: list):
+        for hf_res, seg_res in zip(hf_results, segment_results):
+            image_results = {**hf_res["result"], **seg_res["result"]}
+            store_image_fakes(hf_res["media"]["id"], image_results)
 
     videos = wait_for_some_video() >> get_videos(config["VIDEOS_PATH"])
     transcriptions(config["VIDEOS_PATH"], videos)
@@ -208,7 +239,10 @@ def analyze_dag():
     fakes_results_polimi = detect_fakes_polimi(config["VIDEOS_PATH"], videos)
     save_fakes(fakes_results_deepware, fakes_results_polimi)
     fakes_results_image_hf = detect_image_fakes_hf(videos)
-    save_image_fakes(fakes_results_image_hf)
+    fakes_results_image_segment = detect_image_fakes_segment(
+        config["VIDEOS_PATH"], videos
+    )
+    save_image_fakes(fakes_results_image_hf, fakes_results_image_segment)
 
 
 analyze_dag()

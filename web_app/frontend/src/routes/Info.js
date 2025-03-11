@@ -53,8 +53,20 @@ export default function Info() {
             <List>
               <ListItem>
                 <ListItemText
-                  primary="Organika"
+                  primary="Organika/sdxl-detector"
                   secondary={<Link href="https://huggingface.co/Organika/sdxl-detector" >https://huggingface.co/Organika/sdxl-detector</Link>}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Nahrawy/AIorNot"
+                  secondary={<Link href="https://huggingface.co/Nahrawy/AIorNot" >https://huggingface.co/Nahrawy/AIorNot</Link>}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemText
+                  primary="Segment"
+                  secondary="Modelo de segmentación de regiones fake (Beta)"
                 />
               </ListItem>
             </List>

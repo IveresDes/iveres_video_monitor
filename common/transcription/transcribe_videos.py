@@ -79,7 +79,7 @@ def create_en_es_transcribe_translate(
         trancribe_source (bool, optional): Option to transcribe in the source language.
             Defaults to False.
         whisper_model_path (str, optional): Whisper model. If None it will try to load
-            first from a local model ("large-v2") and then from the default cache
+            first from a local model ("large-v3") and then from the default cache
             system. Defaults to None.
         translation_model_path (str, optional): Translation model. If None it will try
             to load first from a local model ("Helsinki-NLP/opus-mt-en-es") and then
@@ -92,7 +92,7 @@ def create_en_es_transcribe_translate(
     """
 
     if whisper_model_path is None:
-        model = "large-v2"
+        model = "large-v3"
         local_model = models_path / model
         whisper_model_path = str(local_model) if local_model.exists() else model
     if translation_model_path is None:
@@ -170,7 +170,6 @@ def create_en_es_transcribe_translate(
                 str(video_file),
                 task="transcribe",
                 language=src_lang,
-                initial_prompt=",.!?",
                 vad_filter=True,
             )
             src_lang = src_info.language
@@ -192,7 +191,6 @@ def create_en_es_transcribe_translate(
                 str(video_file),
                 task="translate",
                 language=src_lang,
-                initial_prompt=",.!?",
                 vad_filter=True,
             )
             src_lang = en_info.language
@@ -202,7 +200,7 @@ def create_en_es_transcribe_translate(
             ]
             transcriptions["en"] = {
                 "type": "speechTranslate",
-                "language": en_info.language,
+                "language": "en",
                 "text": "".join(seg["text"] for seg in en_segments),
                 "segments": en_segments,
             }
@@ -270,6 +268,8 @@ if __name__ == "__main__":
         trancribe_source=True, device="cuda:0"
     )
 
-    video_file = "data/test/test_user/test.mp4"
+    video_file = "data/videos/Youtube/20241003/@LibertadDigital/2GpktkQJ8Ns/2GpktkQJ8Ns.mp4"
     transcription_result = process_video(video_file)
-    files = write_transcription_files(transcription_result, video_file, "data/test")
+    files = write_transcription_files(
+        transcription_result, video_file, "data/videos/_test/"
+    )

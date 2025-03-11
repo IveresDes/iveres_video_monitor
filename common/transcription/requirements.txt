@@ -1,4 +1,6 @@
-faster-whisper==0.7.1
+faster-whisper==1.0.3
+# ctranslate2==3.24.0 # cuda 11
+# numpy==1.26.4 # numpy2 issues
 syntok==1.4.4
 pysubs2==1.6.1
 torch==2.0.1

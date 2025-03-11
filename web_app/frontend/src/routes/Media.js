@@ -8,6 +8,7 @@ import { Info as InfoIcon, Poll as PollIcon } from '@mui/icons-material'
 import { useParams, Link as RouterLink } from 'react-router-dom'
 import Header from '../components/Header'
 import { whisperMediumWer } from '../utils/whisper_info'
+import { ReactCompareSlider, ReactCompareSliderImage } from 'react-compare-slider'
 
 function formatPercent(num) {
   return Number(num).toLocaleString(
@@ -96,15 +97,32 @@ export default function Media() {
           <>
             <Container>
               {media.mediaType === "image" ?
-
                 <div
                   style={{ display: "flex", width: "100%", justifyContent: "center" }}
                 >
-                  <img
-                    src={"/resources/" + media?.path}
-                    style={{ height: "100%", maxHeight: 320 }}
-                    alt={media?.platformMetadata?.title || ""}
-                  />
+                  {media?.extractedMetadata?.fakes?.segment?.score_image ?
+                    <ReactCompareSlider
+                      itemOne={
+                        <ReactCompareSliderImage
+                          src={"/resources/" + media?.path}
+                          alt={media?.platformMetadata?.title || ""}
+                          style={{ height: "100%", maxHeight: '50vh' }}
+                        />
+                      }
+                      itemTwo={
+                        <ReactCompareSliderImage
+                          src={"/resources/" + media?.extractedMetadata?.fakes?.segment?.score_image}
+                          alt={(media?.platformMetadata?.title || "") + " score"}
+                          style={{ height: "100%", maxHeight: '50vh' }}
+                        />
+                      }
+                    /> :
+                    <img
+                      src={"/resources/" + media?.path}
+                      style={{ height: "100%", maxHeight: '50vh' }}
+                      alt={media?.platformMetadata?.title || ""}
+                    />
+                  }
                 </div>
                 :
                 <video
@@ -232,6 +250,20 @@ export default function Media() {
                 <AnalysisStatus value={media?.analysisStatus?.fake} />
                 {media?.mediaType === "image" ?
                   media?.extractedMetadata?.fakes &&
+                  Object.entries(media.extractedMetadata.fakes).map(([key, val]) => (
+                    <ListItem
+                      key={key}
+                      secondaryAction={
+                        <IconButton component={RouterLink} to="/info"><InfoIcon /></IconButton>
+                      }
+                    >
+                      <ListItemIcon><PollIcon /></ListItemIcon>
+                      <ListItemText
+                        primary={`${key} (${val.name})`}
+                        secondary={`${formatPercent(val.score)} fake`}
+                      />
+                    </ListItem>
+                  ))
                   // <ListItem
                   //   secondaryAction={
                   //     <IconButton component={RouterLink} to="/info"><InfoIcon /></IconButton>
@@ -251,17 +283,6 @@ export default function Media() {
                   //     />
                   //   </ListItemAvatar>
                   // </ListItem>
-                  <ListItem
-                    secondaryAction={
-                      <IconButton component={RouterLink} to="/info"><InfoIcon /></IconButton>
-                    }
-                  >
-                    <ListItemIcon><PollIcon /></ListItemIcon>
-                    <ListItemText
-                      primary="organika"
-                      secondary={`${formatPercent(media?.extractedMetadata?.fakes?.organika?.score)} fake`}
-                    />
-                  </ListItem>
                   :
                   media?.extractedMetadata?.fakes &&
                   <>

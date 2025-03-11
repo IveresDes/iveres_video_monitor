@@ -1,10 +1,11 @@
 import logging
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from time import sleep
 
 import yt_dlp
-import subprocess
+from dotenv import dotenv_values
 
 from common.database.database import (
     find_video_from_metadata,
@@ -23,6 +24,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+config = dotenv_values(Path(__file__).parent.parent.parent / ".env")
 
 
 def create_db_video(request, info, downloads_dir, video_file):
@@ -94,8 +97,8 @@ def convert_video_for_web(video_file):
             "h264",
             "-f",
             "mp4",
-            # "-vf",
-            # "scale=-1:720",
+            "-vf",
+            "scale=-1:720",
             str(vid_file_out),
         ]
     )
@@ -112,7 +115,6 @@ def download_requests_videos(downloads_dir, max_num=0, sleep_video=0.3):
         return
 
     ydl_opts = {
-        "format": "mp4",
         "format_sort": [
             "hasvid",
             "hasaud",
@@ -128,9 +130,12 @@ def download_requests_videos(downloads_dir, max_num=0, sleep_video=0.3):
         # "ignoreerrors": True,
         # "quiet": True,
         "noprogress": True,
+        "proxy": config.get("YT_DLP_PROXY"),
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         for request in requests:
+            # if "www.youtube.com" in request["url"]:
+            #     continue
             try:
                 # Check if url is already downloaded
                 db_video = find_video_from_request_url(request["url"])
@@ -161,6 +166,7 @@ def download_requests_videos(downloads_dir, max_num=0, sleep_video=0.3):
 
                 # Download video, add to db and update request
                 info = ydl.extract_info(request["url"], download=True)
+                sleep(sleep_video)
                 video_file = info["requested_downloads"][0]["filepath"]
                 video_file_out = convert_video_for_web(video_file)
                 video = create_db_video(request, info, downloads_dir, video_file_out)

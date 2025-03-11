@@ -10,7 +10,7 @@ def get_user_last_videos_datetime(channel_id):
     videos_datetime = {}
     try:
         url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
-        r = requests.get(url)
+        r = requests.get(url, timeout=5)
         root = ET.fromstring(r.text)
         ns = {
             "yt": "http://www.youtube.com/xml/schemas/2015",
