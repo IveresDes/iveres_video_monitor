@@ -71,6 +71,7 @@ Create envs `bash scripts/create_envs.sh`
 
 * Transcription: `bash common/transcription/download_models.sh`
 * Deepware: `bash common/fakes_deepware/download_weights.sh`
+* Fake segments (manual): `common/fakes_segment/models/mit-b0_fi_checkpoint-97100`
 
 **Airflow**
 
@@ -144,6 +145,21 @@ Add app to pm2:
 3. `pm2 start npm --name iveres-monitor --time -- start`: start pm2
 4. `pm2 save`: save pm2 config
 
+#### Users
+
+The roles and permissions for web application users are the following:
+
+| Role     | View videos | Upload videos | Edit config | Permissions code |
+| ---      | ---         | ---           | ---         | ---              |
+| viewer   | ✓           | ✕             | ✕           | 1                |
+| uploader | ✓           | ✓             | ✕           | 3                |
+| editor   | ✓           | ✓             | ✓           | 7                |
+
+The creation of new users is done manually for now. You can use the `node.js` script `web_app/backend/db/manualAddUser.js`. For example running:
+```bash
+node web_app/backend/db/manualAddUser.js username editor
+```
+
 #### REST API endpoints
 
 * `/resources`: video files (videos, subtitles, ...)
@@ -160,21 +176,6 @@ Add app to pm2:
     * [GET] `/api/media?page=0&size=100`: get list of media
     * [GET] `/api/media/:id`: get media info
     * [POST] `/api/media`: post a media file
-
-#### Users
-
-The roles and permissions for web application users are the following:
-
-| Role     | View videos | Upload videos | Edit config | Permissions code |
-| ---      | ---         | ---           | ---         | ---              |
-| viewer   | ✓           | ✕             | ✕           | 1                |
-| uploader | ✓           | ✓             | ✕           | 3                |
-| editor   | ✓           | ✓             | ✓           | 7                |
-
-The creation of new users is done manually for now. You can use the `node.js` script `web_app/backend/db/manualAddUser.js`. For example running:
-```bash
-node web_app/backend/db/manualAddUser.js username editor
-```
 
 ### Database
 

@@ -14,7 +14,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-model_dir = Path(__file__).parent / "models/mit-b0-gen-v12-di_checkpoint-15800/"
+model_dir = Path(__file__).parent / "models/mit-b0_fi_checkpoint-97100/"
 
 
 def create_scanner(device="cuda:0"):
