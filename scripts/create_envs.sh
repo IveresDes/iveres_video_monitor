@@ -41,3 +41,10 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r common/fakes_deepware/requirements.txt
 python -m pip install -r common/fakes_polimi/requirements.txt
 deactivate
+
+# Fakes image env
+python3.10 -m venv envs/env_fakes_image
+source envs/env_fakes_image/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r common/fakes_segment/requirements.txt
+deactivate

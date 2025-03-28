@@ -67,6 +67,11 @@ Configuration file: `.env`
 
 Create envs `bash scripts/create_envs.sh`
 
+Old Cuda 11 workaround for `common/transcription/requirements.txt`:
+- `source envs/env_transcribe/bin/activate`
+- `pip install faster-whisper==1.0.3`
+- `pip install ctranslate2==3.24.0`
+
 **Models**
 
 * Transcription: `bash common/transcription/download_models.sh`
